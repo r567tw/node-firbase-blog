@@ -1,0 +1,70 @@
+<% extend('../layouts/dashboard') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+
+    <div class="btn-group w-100">
+      <a href="/dashboard/archives?status=public" class="btn btn-outline-secondary w-100 rounded-0 <%if(status==='public'){%>active<%}%>">已發佈</a>
+      <a href="/dashboard/archives?status=draft" class="btn btn-outline-secondary w-100 rounded-0 <%if(status==='draft'){%>active<%}%>">草稿</a>
+      <a href="/dashboard/article" class="btn btn-primary">新增文章</a>
+    </div>
+
+    <% for(article in articles){ %>
+    <div class=" card my-3">
+        <h4 class="card-header">
+          <%= articles[article].title %>
+        </h4>
+        <div class="card-body">
+          <div>
+            <%= stringTags(articles[article].content).slice(0,150) %>
+            ...
+          </div>
+          <div>
+            <span class="fa fa-clock-o"></span>
+            <%= moment(articles[article].createdAt*1000).format('YYYY/MM/DD') %>
+            ,
+            <span class="fa fa-folder-open-o"></span>
+            <span>
+
+              <%- categories[articles[article].category].name %>
+
+            </span>
+          </div>
+        </div>
+        <div class="card-footer p-0 btn-group">
+          <a href="#" class="btn btn-outline-danger rounded-0 deletePost" data-id="<%-articles[article].id%>"
+            data-title="<%-articles[article].title%>">刪除</a>
+          <a href="/dashboard/article/<%-articles[article].id%>"
+            class="btn btn-outline-secondary w-100 rounded-0">編輯</a>
+
+          <a href="/dashboard/article/<%-articles[article].id%>" target="_blank"
+            class="btn btn-outline-secondary w-100 rounded-0">預覽</a>
+
+        </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/pagination')%>
+
+
+<script>
+  $(document).ready(function () {
+    $('.deletePost').on('click', function (e) {
+      e.preventDefault();
+      var id = $(this).data('id')
+      var title = $(this).data('title')
+      if (confirm(`你確定要刪除 '${title}' 這篇文章嗎？`)) {
+        $.ajax({
+          url: `/dashboard/article/delete/${id}`,
+          method: 'POST'
+        }).done(function (res) {
+          alert('文章已刪除');
+          window.location.reload()
+        })
+      }
+
+    })
+  });
+</script>
